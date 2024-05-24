@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goated API</title>
+</head>
+
+<body>
+    <h2>All Users</h2>
+    <ol id="userList"></ol>
+    <button type="button" id="userListBtn">Get All Users Info</button>
+
+    <h2>User Info</h2>
+    <form id="userForm">
+        <label for="userId">Enter User ID:</label>
+        <input type="text" name="userId" id="userId">
+        <button type="button" id="userIdBtn">Get User Info</button>
+    </form>
+
+    <div id="userInfo"></div>
+
+    <form id="createUser">
+        <h2>Create User</h2>
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="createUsername">
+        <label for="email">Email:</label>
+        <input type="text" name="email" id="createEmail">
+        <label for="password">Password:</label>
+        <input type="text" name="password" id="createPassword">
+        <button type="submit" id="createUserBtn">Create User</button>
+    </form>
+
+    <h2>Change User Information</h2>
+    <form id="changeUserInfo">
+        <label for="CUI-id">User ID:</label>
+        <input type="text" name="CUI-id" id="CUI-id">
+        <label for="CUI-username">Username:</label>
+        <input type="text" name="CUI-username" id="CUI-username">
+        <label for="CUI-email">Email:</label>
+        <input type="text" name="CUI-email" id="CUI-email">
+        <label for="CUI-password">Password:</label>
+        <input type="text" name="CUI-password" id="CUI-password">
+        <button type="submit" id="changeUserBtn">Change User Info</button>
+        <div id="CUI-result"></div>
+    </form>
+
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="loginEmail">Email:</label>
+        <input type="text" name="loginEmail" id="loginEmail">
+        <label for="loginPassword">Password:</label>
+        <input type="password" name="loginPassword" id="loginPassword">
+        <button type="submit" id="loginBtn">Login</button>
+        <div id="loginResult"></div>
+    </form>
+
+    <script>
+        document.getElementById("userIdBtn").addEventListener("click", async () => {
+            const userId = document.getElementById("userId").value;
+            try {
+                const response = await fetch(`http://localhost:3000/user/${userId}`);
+                const data = await response.json();
+                const userInfoDiv = document.getElementById("userInfo");
+                userInfoDiv.innerHTML = "";
+                if (data.error) {
+                    userInfoDiv.textContent = `Error: ${data.error}`;
+                } else {
+                    userInfoDiv.innerHTML = `<p>${JSON.stringify(data)}</p>`;
+                }
+            } catch (error) {
+                console.error("Error fetching user info:", error);
+            }
+        });
+
+        document.getElementById("userListBtn").addEventListener("click", async () => {
+            try {
+                const response = await fetch("http://localhost:3000/users");
+                const users = await response.json();
+                const userList = document.getElementById("userList");
+                userList.innerHTML = "";
+                users.forEach(user => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = JSON.stringify(user);
+                    userList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        });
+
+        document.getElementById("createUserBtn").addEventListener("click", async (event) => {
+            event.preventDefault();
+            const createUsername = document.getElementById("createUsername").value;
+            const createEmail = document.getElementById("createEmail").value;
+            const createPassword = document.getElementById("createPassword").value;
+            try {
+                const response = await fetch("http://localhost:3000/create-user", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: createUsername,
+                        email: createEmail,
+                        password: createPassword
+                    })
+                });
+                const data = await response.text();
+                console.log(data);
+            } catch (error) {
+                console.error("Error creating user:", error);
+            }
+        });
+
+        document.getElementById("changeUserBtn").addEventListener("click", async (event) => {
+            event.preventDefault();
+            const userId = document.getElementById("CUI-id").value;
+            const username = document.getElementById("CUI-username").value;
+            const email = document.getElementById("CUI-email").value;
+            const password = document.getElementById("CUI-password").value;
+            try {
+                const response = await fetch(`http://localhost:3000/change-user-info/${userId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await response.json();
+                console.log(data);
+                document.getElementById("CUI-result").innerHTML = JSON.stringify(data);
+            } catch (error) {
+                console.error("Error changing user info:", error);
+            }
+        });
+
+        document.getElementById("loginBtn").addEventListener("click", async (event) => {
+            event.preventDefault();
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            try {
+                const response = await fetch("http://localhost:3000/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                console.log(data);
+                document.getElementById("loginResult").innerHTML = data.error ? `Error: ${data.error}` : JSON.stringify(data);
+            } catch (error) {
+                console.error("Error logging in:", error);
+            }
+        });
+
+    </script>
+</body>
+
+</html>
